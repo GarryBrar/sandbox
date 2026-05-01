@@ -1,0 +1,13 @@
+[project]
+name = "mackeylocker"
+version = "0.1.0"
+description = "Lock keyboard and Touch Bar input on macOS for cleaning"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = [
+    "pyobjc-framework-Quartz",
+]
+
+[project.scripts]
+mackeylocker = "mackeylocker:main"
