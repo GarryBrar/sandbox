@@ -183,34 +183,88 @@ def do_unlock(touch_bar=True):
 # ---- ui ----
 
 def build_ui(touch_bar=True):
-    root = tk.Tk()
-    root.title("MacKeylocker")
-    root.attributes("-topmost", True)
-    root.geometry("380x200+100+100")
-    root.resizable(False, False)
-    root.configure(bg="#1a1a2e")
+    BG = "#0d0d0d"
+    BG_CARD = "#161616"
+    BORDER = "#2a2a2a"
+    FG = "#e8e8e8"
+    FG_DIM = "#6b6b6b"
+    FG_MUTED = "#4a4a4a"
+    ACCENT = "#c4956a"
+    ACCENT_HOVER = "#d4a57a"
+    BADGE_BG = "#1e2a1e"
+    BADGE_FG = "#5cb85c"
 
+    root = tk.Tk()
+    root.title("mackeylocker")
+    root.attributes("-topmost", True)
+    root.geometry("520x400+100+100")
+    root.resizable(False, False)
+    root.configure(bg=BG)
+
+    outer = tk.Frame(root, bg=BG, padx=20, pady=20)
+    outer.pack(fill="both", expand=True)
+
+    card = tk.Frame(outer, bg=BG_CARD, highlightbackground=BORDER,
+                    highlightthickness=1, padx=32, pady=28)
+    card.pack(fill="both", expand=True)
+
+    # ── top bar: app name + status ──
+    header = tk.Frame(card, bg=BG_CARD)
+    header.pack(fill="x", pady=(0, 20))
+
+    tk.Label(
+        header, text="mackeylocker", font=("SF Mono", 10), fg=FG_MUTED, bg=BG_CARD,
+    ).pack(side="left")
+
+    tk.Label(
+        header, text="● locked", font=("SF Mono", 10), fg=BADGE_FG, bg=BG_CARD,
+    ).pack(side="right")
+
+    # ── main message (centered) ──
     lock_msg = "Keyboard & Touch Bar locked" if touch_bar else "Keyboard locked"
     tk.Label(
-        root, text=lock_msg,
-        font=("Helvetica", 18, "bold"), fg="#e0e0e0", bg="#1a1a2e",
-    ).pack(pady=(20, 5))
+        card, text=lock_msg,
+        font=("Helvetica Neue", 20, "bold"), fg=FG, bg=BG_CARD, justify="center",
+    ).pack(pady=(0, 8))
 
     tk.Label(
-        root, text="unlock: button / cmd+opt+ctrl+shift / triple-click",
-        font=("Helvetica", 11), fg="#888888", bg="#1a1a2e",
-    ).pack(pady=(0, 15))
+        card, text="Input is blocked while you clean your keys.",
+        font=("Helvetica Neue", 13), fg=FG_DIM, bg=BG_CARD, justify="center",
+    ).pack(pady=(0, 24))
 
+    # ── unlock button ──
     def on_unlock():
         do_unlock(touch_bar=touch_bar)
         root.destroy()
 
     tk.Button(
-        root, text="Unlock", font=("Helvetica", 15, "bold"),
-        bg="#e94560", fg="white", activebackground="#ff6b6b",
-        activeforeground="white", relief="flat", padx=20, pady=8,
+        card, text="Unlock", font=("Helvetica Neue", 13, "bold"),
+        bg=ACCENT, fg="#0d0d0d", activebackground=ACCENT_HOVER,
+        activeforeground="#0d0d0d", relief="flat", padx=32, pady=10,
+        cursor="hand2", borderwidth=0, highlightthickness=0,
         command=on_unlock,
-    ).pack(pady=5)
+    ).pack(pady=(0, 24))
+
+    # ── shortcuts section ──
+    tk.Frame(card, bg=BORDER, height=1).pack(fill="x", pady=(0, 14))
+
+    tk.Label(
+        card, text="OTHER WAYS TO UNLOCK",
+        font=("SF Mono", 9), fg=FG_MUTED, bg=BG_CARD, justify="center",
+    ).pack(pady=(0, 10))
+
+    hints_frame = tk.Frame(card, bg=BG_CARD)
+    hints_frame.pack()
+
+    hints = [
+        ("⌘ ⌥ ⌃ ⇧", "Hold all four modifiers"),
+        ("click × 3", "Triple-click the mouse"),
+    ]
+    for symbol, label in hints:
+        row = tk.Frame(hints_frame, bg=BG_CARD)
+        row.pack(side="left", padx=20)
+        tk.Label(row, text=symbol, font=("SF Mono", 13), fg=FG_DIM, bg=BG_CARD).pack()
+        tk.Label(row, text=label, font=("Helvetica Neue", 10), fg=FG_MUTED, bg=BG_CARD).pack(pady=(2, 0))
 
     root.protocol("WM_DELETE_WINDOW", on_unlock)
 
