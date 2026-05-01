@@ -61,6 +61,7 @@ event_tap = None
 run_loop = None
 unlock_requested = threading.Event()
 click_times = []
+_touchbar_suppress_stop = threading.Event()
 
 TRIPLE_CLICK_WINDOW = 1.0
 ALL_MODIFIERS = (
@@ -73,8 +74,21 @@ ALL_MODIFIERS = (
 
 # ---- touch bar ----
 
+def _suppress_touch_bar_loop():
+    """Keep killing Touch Bar processes until _touchbar_suppress_stop is set.
+    Needed because launchd respawns them on any interaction."""
+    while not _touchbar_suppress_stop.is_set():
+        for proc in ("TouchBarServer", "ControlStrip"):
+            subprocess.run(
+                ["pkill", "-f", proc],
+                stderr=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+            )
+        _touchbar_suppress_stop.wait(timeout=0.5)
+
+
 def disable_touch_bar():
-    killed = False
+    any_found = False
     for proc in ("TouchBarServer", "ControlStrip"):
         result = subprocess.run(
             ["pkill", "-f", proc],
@@ -82,20 +96,26 @@ def disable_touch_bar():
             stdout=subprocess.DEVNULL,
         )
         if result.returncode == 0:
-            killed = True
-    if killed:
-        print("Touch Bar disabled.")
-    else:
+            any_found = True
+
+    if not any_found:
         print("No Touch Bar processes found (probably not a Touch Bar Mac).")
+        return
+
+    _touchbar_suppress_stop.clear()
+    t = threading.Thread(target=_suppress_touch_bar_loop, daemon=True)
+    t.start()
+    print("Touch Bar disabled.")
 
 
 def enable_touch_bar():
+    _touchbar_suppress_stop.set()
+    time.sleep(0.6)
     subprocess.run(
-        ["killall", "ControlStrip"],
+        ["killall", "-u", os.environ.get("SUDO_USER", ""), "ControlStrip"],
         stderr=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
     )
-    time.sleep(1)
     print("Touch Bar re-enabled.")
 
 
