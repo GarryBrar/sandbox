@@ -1,7 +1,6 @@
 # MacKeylocker
 
-A small macOS utility that locks your keyboard (and optionally the Touch Bar) so you can clean your laptop without triggering random inputs. This is a quick weekend throwaway script that is expected to work on most Mac configs. Note that documentation was initially created by
-GenAI. 
+A small macOS utility that locks your keyboard (and Touch Bar, if you have one). Originally built for cleaning your keys without firing off random inputs, but useful for anything where you want to keep your Mac awake and active without accidentally triggering shortcuts — presentations, reading, monitoring a process, etc. Quick weekend script, works on most Mac configs.
 
 ## Install
 
